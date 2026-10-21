@@ -1,0 +1,4 @@
+email_config.json
+__pycache__/
+last_run.log
+run_daily.bat
