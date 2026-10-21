@@ -496,7 +496,9 @@ def send_email(jobs, report_path):
             f'<span style="color:#1f8a4c">{paid} lønnet</span> · '
             f'<span style="color:#c0392b">{len(jobs) - paid} ulønnet</span> · {len(new)} nye siden sidst</p>'
             f'{"".join(rows) or "<p>Ingen job fundet i dag.</p>"}'
-            f'<p style="color:#6b6b70;font-size:12px">Hele rapporten er vedhæftet (museumsjob.html).</p></div>')
+            + (f'<p><a href="{html.escape(os.environ["REPORT_URL"])}" style="font-weight:600">Åbn rapporten på '
+               f'hjemmesiden</a></p>' if os.environ.get("REPORT_URL") else "")
+            + '<p style="color:#6b6b70;font-size:12px">Hele rapporten er også vedhæftet (museumsjob.html).</p></div>')
 
     msg = EmailMessage()
     msg["Subject"] = (f"Museumsjob: {len(new)} nye job" if new else f"Museumsjob: ingen nye job ({len(jobs)} i alt)")

@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write          # to save seen.json and the report back to the repo
+  pages: write             # to publish the report on GitHub Pages
+  id-token: write
 
 concurrency:
   group: daily-search
@@ -16,6 +18,9 @@ jobs:
   search:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -31,6 +36,7 @@ jobs:
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
           EMAIL_APP_PASSWORD: ${{ secrets.EMAIL_APP_PASSWORD }}
+          REPORT_URL: https://finlytics1.github.io/museumsjob/
           PYTHONIOENCODING: utf-8
         run: python museumsjob.py --email --no-open
 
@@ -42,3 +48,14 @@ jobs:
           git add seen.json museumsjob.html
           git diff --cached --quiet || git commit -m "Daily search $(date +%F)"
           git push
+
+      - name: Prepare website
+        run: mkdir -p _site && cp museumsjob.html _site/index.html
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Publish website
+        id: deployment
+        uses: actions/deploy-pages@v4
